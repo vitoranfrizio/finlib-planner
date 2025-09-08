@@ -131,7 +131,7 @@ export const FinancialForm: React.FC<FinancialFormProps> = ({ inputs, onChange, 
             <Input
               id="inflacao"
               type="number"
-              step="0.01"
+              step="1"
               value={inputs.inflacao}
               onChange={(e) => handleInputChange('inflacao', e.target.value)}
             />
@@ -141,7 +141,7 @@ export const FinancialForm: React.FC<FinancialFormProps> = ({ inputs, onChange, 
             <Input
               id="rentabilidadeEsperada"
               type="number"
-              step="0.01"
+              step="1"
               value={inputs.rentabilidadeEsperada}
               onChange={(e) => handleInputChange('rentabilidadeEsperada', e.target.value)}
             />
