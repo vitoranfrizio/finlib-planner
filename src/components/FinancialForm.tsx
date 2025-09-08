@@ -17,9 +17,12 @@ interface FinancialFormProps {
 
 export const FinancialForm: React.FC<FinancialFormProps> = ({ inputs, onChange, results }) => {
   const handleInputChange = (field: keyof FinancialInputs, value: string | number) => {
+    // For numeric fields, always convert to number
+    const numericFields = ['idadeAtual', 'idadeAposentadoria', 'expectativaVida', 'patrimonioInicial', 'aportesMensais', 'retiradasMensais', 'inflacao', 'rentabilidadeEsperada', 'retiradaMensalIdeal'];
+    
     onChange({
       ...inputs,
-      [field]: typeof value === 'string' ? value : Number(value)
+      [field]: numericFields.includes(field) ? Number(value) : value
     });
   };
 
