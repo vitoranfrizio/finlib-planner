@@ -34,7 +34,7 @@ export interface FinancialInputs {
 }
 
 export const calculateRealReturn = (nominalRate: number, inflation: number): number => {
-  return ((nominalRate - inflation) / (1 + inflation / 100)) * 100;
+  return ((1 + nominalRate / 100) / (1 + inflation / 100) - 1) * 100;
 };
 
 export const calculateFutureValue = (

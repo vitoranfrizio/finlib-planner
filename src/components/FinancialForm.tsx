@@ -148,7 +148,7 @@ export const FinancialForm: React.FC<FinancialFormProps> = ({ inputs, onChange, 
           </div>
           <div>
             <Label className="text-financial-neutral">
-              Rentabilidade Real: {((inputs.rentabilidadeEsperada - inputs.inflacao) / (1 + inputs.inflacao / 100) * 100).toFixed(2)}%
+              Rentabilidade Real: {(((1 + inputs.rentabilidadeEsperada / 100) / (1 + inputs.inflacao / 100) - 1) * 100).toFixed(2)}%
             </Label>
           </div>
         </CardContent>
