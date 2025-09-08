@@ -45,7 +45,15 @@ export const calculateFutureValue = (
 ): number => {
   const monthlyRate = rate / 100 / 12;
   const futureValuePV = pv * Math.pow(1 + monthlyRate, periods);
-  const futureValuePMT = pmt * ((Math.pow(1 + monthlyRate, periods) - 1) / monthlyRate);
+  
+  // Handle zero rate case to avoid division by zero
+  let futureValuePMT = 0;
+  if (monthlyRate === 0) {
+    futureValuePMT = pmt * periods;
+  } else {
+    futureValuePMT = pmt * ((Math.pow(1 + monthlyRate, periods) - 1) / monthlyRate);
+  }
+  
   return futureValuePV + futureValuePMT;
 };
 
@@ -55,6 +63,12 @@ export const calculateSustainableWithdrawal = (
   periods: number
 ): number => {
   const monthlyRate = rate / 100 / 12;
+  
+  // Handle zero rate case
+  if (monthlyRate === 0) {
+    return patrimonio / periods;
+  }
+  
   return patrimonio * (monthlyRate * Math.pow(1 + monthlyRate, periods)) / 
          (Math.pow(1 + monthlyRate, periods) - 1);
 };
@@ -86,7 +100,7 @@ export const calculatePatrimonyEvolution = (inputs: FinancialInputs) => {
   }
   
   // Withdrawal phase
-  const retirementPatrimony = evolution[evolution.length - 1].patrimony;
+  const retirementPatrimony = evolution.length > 0 ? evolution[evolution.length - 1].patrimony : 0;
   let currentPatrimony = retirementPatrimony;
   
   for (let year = 1; year <= yearsInRetirement; year++) {
