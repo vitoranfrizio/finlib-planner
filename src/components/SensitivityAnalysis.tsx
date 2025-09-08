@@ -7,9 +7,16 @@ interface SensitivityAnalysisProps {
 }
 
 export const SensitivityAnalysis: React.FC<SensitivityAnalysisProps> = ({ inputs }) => {
-  const baseAporte = 2000;
+  const baseAporte = inputs.aportesMensais;
   const aporteVariations = [-1000, -500, 0, 500, 1000, 1500];
-  const retirementAgeVariations = [55, 60, 65, 70];
+  
+  // Dynamic retirement age variations based on user's retirement age
+  const retirementAgeVariations = [
+    inputs.idadeAposentadoria - 10,
+    inputs.idadeAposentadoria - 5,
+    inputs.idadeAposentadoria, // User's retirement age is always 3rd column
+    inputs.idadeAposentadoria + 5
+  ];
   
   const realReturn = calculateRealReturn(inputs.rentabilidadeEsperada, inputs.inflacao);
 
@@ -77,11 +84,16 @@ export const SensitivityAnalysis: React.FC<SensitivityAnalysisProps> = ({ inputs
                     <td className="p-3 border border-financial-blue/20 font-medium text-financial-blue-dark">
                       {formatCurrency(monthlyContribution)}
                     </td>
-                    {retirementAgeVariations.map(age => (
-                      <td key={age} className="p-3 text-center border border-financial-blue/20 text-financial-blue">
-                        {formatCurrency(calculatePreservingPatrimony(monthlyContribution, age))}
-                      </td>
-                    ))}
+                     {retirementAgeVariations.map(age => {
+                       const isUserTargetCell = monthlyContribution === inputs.aportesMensais && age === inputs.idadeAposentadoria;
+                       return (
+                         <td key={age} className={`p-3 text-center border border-financial-blue/20 text-financial-blue ${
+                           isUserTargetCell ? 'bg-financial-blue-light/50 font-semibold' : ''
+                         }`}>
+                           {formatCurrency(calculatePreservingPatrimony(monthlyContribution, age))}
+                         </td>
+                       );
+                     })}
                   </tr>
                 );
               })}

@@ -17,25 +17,49 @@ const Index = () => {
     patrimonioInicial: 50000,
     aportesMensais: 2000,
     retiradasMensais: 8000,
-    retiradaMensalIdeal: 10000,
+    retiradaMensalIdeal: 0, // Will be calculated automatically
   });
 
-  const results = useMemo(() => {
-    const yearsToRetirement = inputs.idadeAposentadoria - inputs.idadeAtual;
-    const yearsInRetirement = inputs.expectativaVida - inputs.idadeAposentadoria;
+  // Calculate ideal monthly withdrawal based on preserving patrimony table
+  const idealWithdrawal = useMemo(() => {
     const realReturn = calculateRealReturn(inputs.rentabilidadeEsperada, inputs.inflacao);
+    const yearsToRetirement = inputs.idadeAposentadoria - inputs.idadeAtual;
     const monthsToRetirement = yearsToRetirement * 12;
     
-    // Patrimônio na aposentadoria
-    const patrimonioAposentadoria = calculateFutureValue(
+    const futurePatrimony = calculateFutureValue(
       inputs.patrimonioInicial,
       inputs.aportesMensais,
       realReturn,
       monthsToRetirement
     );
+    
+    // Monthly withdrawal that preserves capital (interest only)
+    const monthlyRate = realReturn / 100 / 12;
+    return futurePatrimony * monthlyRate;
+  }, [inputs.patrimonioInicial, inputs.aportesMensais, inputs.rentabilidadeEsperada, inputs.inflacao, inputs.idadeAposentadoria, inputs.idadeAtual]);
+
+  // Update inputs with calculated ideal withdrawal
+  const inputsWithIdealWithdrawal = useMemo(() => ({
+    ...inputs,
+    retiradaMensalIdeal: idealWithdrawal
+  }), [inputs, idealWithdrawal]);
+
+  const results = useMemo(() => {
+    const yearsToRetirement = inputsWithIdealWithdrawal.idadeAposentadoria - inputsWithIdealWithdrawal.idadeAtual;
+    const yearsInRetirement = inputsWithIdealWithdrawal.expectativaVida - inputsWithIdealWithdrawal.idadeAposentadoria;
+    const realReturn = calculateRealReturn(inputsWithIdealWithdrawal.rentabilidadeEsperada, inputsWithIdealWithdrawal.inflacao);
+    const monthsToRetirement = yearsToRetirement * 12;
+    
+    // Patrimônio na aposentadoria
+    const patrimonioAposentadoria = calculateFutureValue(
+      inputsWithIdealWithdrawal.patrimonioInicial,
+      inputsWithIdealWithdrawal.aportesMensais,
+      realReturn,
+      monthsToRetirement
+    );
 
     // Aportes totais
-    const aportesTotal = inputs.aportesMensais * monthsToRetirement;
+    const aportesTotal = inputsWithIdealWithdrawal.aportesMensais * monthsToRetirement;
 
     // Patrimônio final (após retiradas)
     const monthlyRate = realReturn / 100 / 12;
@@ -43,7 +67,7 @@ const Index = () => {
     const monthsInRetirement = yearsInRetirement * 12;
     
     for (let i = 0; i < monthsInRetirement; i++) {
-      patrimonioFinal = patrimonioFinal * (1 + monthlyRate) - inputs.retiradasMensais;
+      patrimonioFinal = patrimonioFinal * (1 + monthlyRate) - inputsWithIdealWithdrawal.retiradasMensais;
       if (patrimonioFinal <= 0) {
         patrimonioFinal = 0;
         break;
@@ -55,11 +79,11 @@ const Index = () => {
       patrimonioFinal: Math.max(0, patrimonioFinal),
       aportesTotal,
     };
-  }, [inputs]);
+  }, [inputsWithIdealWithdrawal]);
 
   const chartData = useMemo(() => {
-    return calculatePatrimonyEvolution(inputs);
-  }, [inputs]);
+    return calculatePatrimonyEvolution(inputsWithIdealWithdrawal);
+  }, [inputsWithIdealWithdrawal]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -80,7 +104,7 @@ const Index = () => {
         {/* Financial Form */}
         <section>
           <FinancialForm 
-            inputs={inputs}
+            inputs={inputsWithIdealWithdrawal}
             onChange={setInputs}
             results={results}
           />
@@ -91,7 +115,7 @@ const Index = () => {
           <div className="xl:col-span-2">
             <PatrimonyChart 
               data={chartData}
-              retirementAge={inputs.idadeAposentadoria}
+              retirementAge={inputsWithIdealWithdrawal.idadeAposentadoria}
             />
           </div>
           <div>
@@ -101,7 +125,7 @@ const Index = () => {
 
         {/* Sensitivity Analysis */}
         <section>
-          <SensitivityAnalysis inputs={inputs} />
+          <SensitivityAnalysis inputs={inputsWithIdealWithdrawal} />
         </section>
       </main>
 

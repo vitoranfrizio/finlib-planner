@@ -191,13 +191,13 @@ export const FinancialForm: React.FC<FinancialFormProps> = ({ inputs, onChange, 
             />
           </div>
           <div>
-            <Label htmlFor="retiradaMensalIdeal">Retirada Mensal Ideal (R$)</Label>
+            <Label htmlFor="retiradaMensalIdeal">Retirada Mensal Ideal (R$) - Calculado automaticamente</Label>
             <Input
               id="retiradaMensalIdeal"
-              type="number"
-              value={inputs.retiradaMensalIdeal}
-              onChange={(e) => handleCurrencyChange('retiradaMensalIdeal', e.target.value)}
-              placeholder="0"
+              type="text"
+              value={formatCurrency(inputs.retiradaMensalIdeal)}
+              disabled
+              className="bg-gray-100 cursor-not-allowed text-financial-blue-dark font-semibold"
             />
           </div>
         </CardContent>
