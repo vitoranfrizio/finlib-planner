@@ -57,6 +57,14 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        financial: {
+          blue: "hsl(var(--financial-blue))",
+          "blue-light": "hsl(var(--financial-blue-light))",
+          "blue-dark": "hsl(var(--financial-blue-dark))",
+          success: "hsl(var(--financial-success))",
+          warning: "hsl(var(--financial-warning))",
+          neutral: "hsl(var(--financial-neutral))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

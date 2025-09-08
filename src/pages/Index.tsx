@@ -1,12 +1,118 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import React, { useState, useMemo } from 'react';
+import { FinancialForm } from '@/components/FinancialForm';
+import { PatrimonyChart } from '@/components/PatrimonyChart';
+import { SensitivityAnalysis } from '@/components/SensitivityAnalysis';
+import { InvestmentComparator } from '@/components/InvestmentComparator';
+import { FinancialInputs, calculatePatrimonyEvolution, calculateFutureValue, calculateRealReturn } from '@/utils/financial';
 
 const Index = () => {
+  const [inputs, setInputs] = useState<FinancialInputs>({
+    nome: '',
+    idadeAtual: 32,
+    idadeAposentadoria: 65,
+    expectativaVida: 95,
+    perfilInvestimento: 'moderado',
+    inflacao: 5.00,
+    rentabilidadeEsperada: 10.00,
+    patrimonioInicial: 50000,
+    aportesMensais: 2000,
+    retiradasMensais: 8000,
+    retiradaMensalIdeal: 10000,
+  });
+
+  const results = useMemo(() => {
+    const yearsToRetirement = inputs.idadeAposentadoria - inputs.idadeAtual;
+    const yearsInRetirement = inputs.expectativaVida - inputs.idadeAposentadoria;
+    const realReturn = calculateRealReturn(inputs.rentabilidadeEsperada, inputs.inflacao);
+    const monthsToRetirement = yearsToRetirement * 12;
+    
+    // Patrimônio na aposentadoria
+    const patrimonioAposentadoria = calculateFutureValue(
+      inputs.patrimonioInicial,
+      inputs.aportesMensais,
+      realReturn,
+      monthsToRetirement
+    );
+
+    // Aportes totais
+    const aportesTotal = inputs.aportesMensais * monthsToRetirement;
+
+    // Patrimônio final (após retiradas)
+    const monthlyRate = realReturn / 100 / 12;
+    let patrimonioFinal = patrimonioAposentadoria;
+    const monthsInRetirement = yearsInRetirement * 12;
+    
+    for (let i = 0; i < monthsInRetirement; i++) {
+      patrimonioFinal = patrimonioFinal * (1 + monthlyRate) - inputs.retiradasMensais;
+      if (patrimonioFinal <= 0) {
+        patrimonioFinal = 0;
+        break;
+      }
+    }
+
+    return {
+      patrimonioAposentadoria,
+      patrimonioFinal: Math.max(0, patrimonioFinal),
+      aportesTotal,
+    };
+  }, [inputs]);
+
+  const chartData = useMemo(() => {
+    return calculatePatrimonyEvolution(inputs);
+  }, [inputs]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="bg-gradient-to-r from-financial-blue to-financial-blue-dark text-white py-8">
+        <div className="container mx-auto px-4">
+          <h1 className="text-4xl font-bold text-center mb-2">
+            Calculadora de Liberdade Financeira
+          </h1>
+          <p className="text-center text-blue-100 text-lg">
+            Planeje seu futuro financeiro com precisão e confiança
+          </p>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8 space-y-8">
+        {/* Financial Form */}
+        <section>
+          <FinancialForm 
+            inputs={inputs}
+            onChange={setInputs}
+            results={results}
+          />
+        </section>
+
+        {/* Charts Section */}
+        <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div className="xl:col-span-2">
+            <PatrimonyChart 
+              data={chartData}
+              retirementAge={inputs.idadeAposentadoria}
+            />
+          </div>
+          <div>
+            <InvestmentComparator />
+          </div>
+        </section>
+
+        {/* Sensitivity Analysis */}
+        <section>
+          <SensitivityAnalysis inputs={inputs} />
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-financial-blue-light py-8 mt-12">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-financial-neutral">
+            © 2024 Calculadora de Liberdade Financeira - Planeje seu futuro com inteligência
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };
