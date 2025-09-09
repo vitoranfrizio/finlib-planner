@@ -21,7 +21,6 @@ export const DashboardHeader = () => {
         </div>
 
         <div className="flex items-center justify-center flex-1">
-          <h1 className="text-2xl font-bold">Dashboard Financeiro</h1>
         </div>
 
         {/* Right side - Actions */}
