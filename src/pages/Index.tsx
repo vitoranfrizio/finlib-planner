@@ -1,8 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import { Sidebar } from '@/components/Sidebar';
-import { DashboardHeader } from '@/components/DashboardHeader';
-import { DashboardStats } from '@/components/DashboardStats';
-import { QuickActions } from '@/components/QuickActions';
 import { FinancialForm } from '@/components/FinancialForm';
 import { PatrimonyChart } from '@/components/PatrimonyChart';
 import { SensitivityAnalysis } from '@/components/SensitivityAnalysis';
@@ -90,47 +86,57 @@ const Index = () => {
   }, [inputsWithIdealWithdrawal]);
 
   return (
-    <div className="flex h-screen bg-background">
-      {/* Sidebar */}
-      <Sidebar />
-      
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="bg-gradient-to-r from-financial-blue to-financial-blue-dark text-white py-8">
+        <div className="container mx-auto px-4">
+          <h1 className="text-4xl font-bold text-center mb-2">
+            Calculadora de Liberdade Financeira
+          </h1>
+          <p className="text-center text-blue-100 text-lg">
+            Planeje seu futuro financeiro com precisão e confiança
+          </p>
+        </div>
+      </header>
+
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <DashboardHeader />
-        
-        {/* Main Dashboard Content */}
-        <main className="flex-1 overflow-auto p-6 space-y-6">
-          {/* Stats Cards */}
-          <DashboardStats results={results} inputs={inputsWithIdealWithdrawal} />
-          
-          {/* Quick Actions */}
-          <QuickActions />
-          
-          {/* Charts Section */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <div className="xl:col-span-2">
-              <PatrimonyChart 
-                data={chartData}
-                retirementAge={inputsWithIdealWithdrawal.idadeAposentadoria}
-              />
-            </div>
-            <div>
-              <InvestmentComparator />
-            </div>
-          </div>
-          
-          {/* Financial Form */}
+      <main className="container mx-auto px-4 py-8 space-y-8">
+        {/* Financial Form */}
+        <section>
           <FinancialForm 
             inputs={inputsWithIdealWithdrawal}
             onChange={setInputs}
             results={results}
           />
-          
-          {/* Sensitivity Analysis */}
+        </section>
+
+        {/* Charts Section */}
+        <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div className="xl:col-span-2">
+            <PatrimonyChart 
+              data={chartData}
+              retirementAge={inputsWithIdealWithdrawal.idadeAposentadoria}
+            />
+          </div>
+          <div>
+            <InvestmentComparator />
+          </div>
+        </section>
+
+        {/* Sensitivity Analysis */}
+        <section>
           <SensitivityAnalysis inputs={inputsWithIdealWithdrawal} />
-        </main>
-      </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-financial-blue-light py-8 mt-12">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-financial-neutral">
+            © 2024 Calculadora de Liberdade Financeira - Planeje seu futuro com inteligência
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };
