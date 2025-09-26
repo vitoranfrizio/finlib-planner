@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,15 @@ interface FinancialFormProps {
 }
 
 export const FinancialForm: React.FC<FinancialFormProps> = ({ inputs, onChange, results }) => {
+  const [focusedField, setFocusedField] = useState<Record<string, boolean>>({});
+
+  const handleFocus = (field: keyof FinancialInputs) => {
+    setFocusedField(prev => ({ ...prev, [String(field)]: true }));
+  };
+
+  const handleBlur = (field: keyof FinancialInputs) => {
+    setFocusedField(prev => ({ ...prev, [String(field)]: false }));
+  };
   const handleInputChange = (field: keyof FinancialInputs, value: string | number) => {
     // For numeric fields, always convert to number
     const numericFields = ['idadeAtual', 'idadeAposentadoria', 'expectativaVida', 'patrimonioInicial', 'aportesMensais', 'retiradasMensais', 'inflacao', 'rentabilidadeEsperada', 'retiradaMensalIdeal'];
@@ -82,8 +91,10 @@ export const FinancialForm: React.FC<FinancialFormProps> = ({ inputs, onChange, 
             <Input
               id="idadeAtual"
               type="number"
-              value={inputs.idadeAtual}
+              value={focusedField['idadeAtual'] && inputs.idadeAtual === 0 ? '' : inputs.idadeAtual}
               onChange={(e) => handleInputChange('idadeAtual', e.target.value)}
+              onFocus={() => handleFocus('idadeAtual')}
+              onBlur={() => handleBlur('idadeAtual')}
             />
           </div>
           <div>
@@ -91,8 +102,10 @@ export const FinancialForm: React.FC<FinancialFormProps> = ({ inputs, onChange, 
             <Input
               id="idadeAposentadoria"
               type="number"
-              value={inputs.idadeAposentadoria}
+              value={focusedField['idadeAposentadoria'] && inputs.idadeAposentadoria === 0 ? '' : inputs.idadeAposentadoria}
               onChange={(e) => handleInputChange('idadeAposentadoria', e.target.value)}
+              onFocus={() => handleFocus('idadeAposentadoria')}
+              onBlur={() => handleBlur('idadeAposentadoria')}
             />
           </div>
           <div>
@@ -100,8 +113,10 @@ export const FinancialForm: React.FC<FinancialFormProps> = ({ inputs, onChange, 
             <Input
               id="expectativaVida"
               type="number"
-              value={inputs.expectativaVida}
+              value={focusedField['expectativaVida'] && inputs.expectativaVida === 0 ? '' : inputs.expectativaVida}
               onChange={(e) => handleInputChange('expectativaVida', e.target.value)}
+              onFocus={() => handleFocus('expectativaVida')}
+              onBlur={() => handleBlur('expectativaVida')}
             />
           </div>
         </CardContent>
@@ -135,8 +150,10 @@ export const FinancialForm: React.FC<FinancialFormProps> = ({ inputs, onChange, 
               id="inflacao"
               type="number"
               step="0.01"
-              value={inputs.inflacao}
+              value={focusedField['inflacao'] && inputs.inflacao === 0 ? '' : inputs.inflacao}
               onChange={(e) => handleInputChange('inflacao', e.target.value)}
+              onFocus={() => handleFocus('inflacao')}
+              onBlur={() => handleBlur('inflacao')}
             />
           </div>
           <div>
@@ -145,8 +162,10 @@ export const FinancialForm: React.FC<FinancialFormProps> = ({ inputs, onChange, 
               id="rentabilidadeEsperada"
               type="number"
               step="0.01"
-              value={inputs.rentabilidadeEsperada}
+              value={focusedField['rentabilidadeEsperada'] && inputs.rentabilidadeEsperada === 0 ? '' : inputs.rentabilidadeEsperada}
               onChange={(e) => handleInputChange('rentabilidadeEsperada', e.target.value)}
+              onFocus={() => handleFocus('rentabilidadeEsperada')}
+              onBlur={() => handleBlur('rentabilidadeEsperada')}
             />
           </div>
           <div>
@@ -168,9 +187,11 @@ export const FinancialForm: React.FC<FinancialFormProps> = ({ inputs, onChange, 
             <Input
               id="patrimonioInicial"
               type="number"
-              value={inputs.patrimonioInicial}
+              value={focusedField['patrimonioInicial'] && inputs.patrimonioInicial === 0 ? '' : inputs.patrimonioInicial}
               onChange={(e) => handleCurrencyChange('patrimonioInicial', e.target.value)}
               placeholder="0"
+              onFocus={() => handleFocus('patrimonioInicial')}
+              onBlur={() => handleBlur('patrimonioInicial')}
             />
           </div>
           <div>
@@ -178,9 +199,11 @@ export const FinancialForm: React.FC<FinancialFormProps> = ({ inputs, onChange, 
             <Input
               id="aportesMensais"
               type="number"
-              value={inputs.aportesMensais}
+              value={focusedField['aportesMensais'] && inputs.aportesMensais === 0 ? '' : inputs.aportesMensais}
               onChange={(e) => handleCurrencyChange('aportesMensais', e.target.value)}
               placeholder="0"
+              onFocus={() => handleFocus('aportesMensais')}
+              onBlur={() => handleBlur('aportesMensais')}
             />
           </div>
           <div>
@@ -188,9 +211,11 @@ export const FinancialForm: React.FC<FinancialFormProps> = ({ inputs, onChange, 
             <Input
               id="retiradasMensais"
               type="number"
-              value={inputs.retiradasMensais}
+              value={focusedField['retiradasMensais'] && inputs.retiradasMensais === 0 ? '' : inputs.retiradasMensais}
               onChange={(e) => handleCurrencyChange('retiradasMensais', e.target.value)}
               placeholder="0"
+              onFocus={() => handleFocus('retiradasMensais')}
+              onBlur={() => handleBlur('retiradasMensais')}
             />
           </div>
           <div>

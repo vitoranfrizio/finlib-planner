@@ -121,3 +121,58 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  /* Financial card styling */
+  .card-financial {
+    @apply bg-card border border-border rounded-lg shadow-card p-6;
+  }
+
+  /* Results highlight section */
+  .results-highlight {
+    @apply bg-gradient-to-r from-financial-blue-light to-financial-blue-light/50 border border-financial-blue/20 rounded-lg p-6 mb-8 shadow-[var(--shadow-card)];
+  }
+
+  /* Section titles */
+  .section-title {
+    @apply text-financial-blue-dark font-semibold;
+  }
+
+  /* Label styling */
+  .label-teal {
+    @apply text-financial-neutral;
+  }
+
+  .text-title-blue {
+    @apply text-financial-blue-dark;
+  }
+
+  /* Input field styling */
+  .input-field {
+    @apply bg-secondary border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-smooth;
+  }
+
+  /* Button styling */
+  .btn-income {
+    @apply bg-financial-success hover:bg-financial-success/90 text-white;
+  }
+
+  .btn-expense {
+    @apply bg-destructive hover:bg-destructive/90 text-white;
+  }
+
+  /* Value text styling */
+  .value-text {
+    @apply text-financial-blue;
+  }
+
+  /* Transition utilities */
+  .transition-smooth {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  /* Gradient utilities */
+  .gradient-financial {
+    background: var(--gradient-financial);
+  }
+}

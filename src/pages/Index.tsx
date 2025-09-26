@@ -20,6 +20,7 @@ const Index = () => {
     retiradaMensalIdeal: 0, // Will be calculated automatically
   });
 
+
   // Calculate ideal monthly withdrawal based on preserving patrimony table
   const idealWithdrawal = useMemo(() => {
     const realReturn = calculateRealReturn(inputs.rentabilidadeEsperada, inputs.inflacao);
@@ -85,6 +86,7 @@ const Index = () => {
     return calculatePatrimonyEvolution(inputsWithIdealWithdrawal);
   }, [inputsWithIdealWithdrawal]);
 
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -127,6 +129,7 @@ const Index = () => {
         <section>
           <SensitivityAnalysis inputs={inputsWithIdealWithdrawal} />
         </section>
+
       </main>
 
       {/* Footer */}
@@ -137,6 +140,7 @@ const Index = () => {
           </p>
         </div>
       </footer>
+
     </div>
   );
 };
