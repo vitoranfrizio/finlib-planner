@@ -32,6 +32,15 @@ export function Header() {
             >
               Receitas e Despesas
             </Link>
+            <Link
+              to="/imobiliario/consorcio-ou-financiamento"
+              className={cn(
+                "transition-colors hover:text-foreground/80",
+                location.pathname.startsWith("/imobiliario") ? "text-foreground" : "text-foreground/60"
+              )}
+            >
+              Imobiliário
+            </Link>
           </nav>
         </div>
       </div>
