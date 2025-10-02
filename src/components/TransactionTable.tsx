@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -12,11 +12,14 @@ interface TransactionTableProps {
   onDeleteTransaction: (id: string) => void;
 }
 
+type SortKey = 'date' | 'type' | 'category' | 'description' | 'amount';
+
 export const TransactionTable: React.FC<TransactionTableProps> = ({
   transactions,
   onEditTransaction,
   onDeleteTransaction,
 }) => {
+  const itemsPerPage = 8;
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -28,6 +31,12 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
+  const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' }>({
+    key: 'date',
+    direction: 'desc',
+  });
+  const [currentPage, setCurrentPage] = useState(1);
+
   const handleDelete = (id: string, type: string, amount: number) => {
     if (window.confirm(`Tem certeza que deseja excluir esta ${type}?`)) {
       onDeleteTransaction(id);
@@ -37,6 +46,88 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
       });
     }
   };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [transactions.length]);
+
+  const getSortValue = (transaction: Transaction, key: SortKey) => {
+    switch (key) {
+      case 'date':
+        return new Date(transaction.date).getTime();
+      case 'type':
+        return transaction.amount > 0 ? 'Receita' : 'Despesa';
+      case 'category':
+        return transaction.category || '';
+      case 'description':
+        return transaction.description || '';
+      case 'amount':
+        return transaction.amount;
+      default:
+        return '';
+    }
+  };
+
+  const sortedTransactions = useMemo(() => {
+    const sorted = [...transactions].sort((a, b) => {
+      const aValue = getSortValue(a, sortConfig.key);
+      const bValue = getSortValue(b, sortConfig.key);
+
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+
+      return sortConfig.direction === 'asc'
+        ? String(aValue).localeCompare(String(bValue), 'pt-BR', { sensitivity: 'base' })
+        : String(bValue).localeCompare(String(aValue), 'pt-BR', { sensitivity: 'base' });
+    });
+
+    return sorted;
+  }, [transactions, sortConfig]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedTransactions.length / itemsPerPage));
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const paginatedTransactions = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return sortedTransactions.slice(startIndex, startIndex + itemsPerPage);
+  }, [sortedTransactions, currentPage]);
+
+  const handleSort = (key: SortKey) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
+      }
+      return { key, direction: key === 'date' ? 'desc' : 'asc' };
+    });
+    setCurrentPage(1);
+  };
+
+  const renderSortIndicator = (key: SortKey) => {
+    if (sortConfig.key !== key) {
+      return <span className="text-muted-foreground">↕</span>;
+    }
+    return sortConfig.direction === 'asc' ? <span>↑</span> : <span>↓</span>;
+  };
+
+  const SortableHeader: React.FC<{ label: string; sortKey: SortKey; align?: 'left' | 'right' }>
+    = ({ label, sortKey, align = 'left' }) => (
+      <button
+        type="button"
+        onClick={() => handleSort(sortKey)}
+        className={`flex items-center gap-1 text-sm font-medium ${
+          align === 'right' ? 'ml-auto justify-end' : 'justify-start'
+        } text-foreground hover:text-primary transition-smooth`}
+      >
+        {label}
+        {renderSortIndicator(sortKey)}
+      </button>
+    );
 
   if (transactions.length === 0) {
     return (
@@ -61,11 +152,6 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
     );
   }
 
-  // Sort transactions by date (most recent first)
-  const sortedTransactions = [...transactions].sort((a, b) => 
-    new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
-
   return (
     <div className="card-financial">
       <div className="flex items-center gap-2 mb-4">
@@ -80,26 +166,35 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Data</TableHead>
-              <TableHead>Tipo</TableHead>
-              <TableHead>Categoria</TableHead>
-              <TableHead>Descrição</TableHead>
-              <TableHead className="text-right">Valor</TableHead>
+              <TableHead>
+                <SortableHeader label="Data" sortKey="date" />
+              </TableHead>
+              <TableHead>
+                <SortableHeader label="Tipo" sortKey="type" />
+              </TableHead>
+              <TableHead>
+                <SortableHeader label="Categoria" sortKey="category" />
+              </TableHead>
+              <TableHead>
+                <SortableHeader label="Descrição" sortKey="description" />
+              </TableHead>
+              <TableHead className="text-right">
+                <SortableHeader label="Valor" sortKey="amount" align="right" />
+              </TableHead>
               <TableHead className="w-[100px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedTransactions.map((transaction) => (
+            {paginatedTransactions.map((transaction) => (
               <TableRow key={transaction.id}>
                 <TableCell className="font-medium">
                   {formatDate(transaction.date)}
                 </TableCell>
                 <TableCell>
                   <Badge 
-                    variant={transaction.amount > 0 ? "default" : "destructive"}
                     className={`${
                       transaction.amount > 0 
-                        ? 'bg-success hover:bg-success/90' 
+                        ? 'bg-financial-blue hover:bg-financial-blue/90 text-white border-transparent'
                         : 'bg-destructive hover:bg-destructive/90'
                     } text-white`}
                   >
@@ -143,6 +238,30 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
             ))}
           </TableBody>
         </Table>
+      </div>
+
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <span className="text-sm text-muted-foreground">
+          Página {currentPage} de {totalPages}
+        </span>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+          >
+            Anterior
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+          >
+            Próxima
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -176,15 +176,6 @@ const ConsorcioOuFinanciamento = () => {
       </header>
 
       <main className="container mx-auto px-4 py-12 space-y-8">
-        <section className="text-center space-y-3">
-          <h2 className="text-2xl font-semibold text-foreground">
-            Consórcio ou Financiamento?
-          </h2>
-          <p className="text-muted-foreground max-w-3xl mx-auto">
-            Ajuste os parâmetros de cada modalidade para visualizar o impacto nas parcelas e no valor total desembolsado. Todas as simulações consideram valores em reais (R$) e resultados atualizados na hora.
-          </p>
-        </section>
-
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Card className="border-primary/10">
             <CardHeader className="space-y-1.5">

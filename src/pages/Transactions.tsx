@@ -5,6 +5,7 @@ import { WaterfallChart } from '@/components/WaterfallChart';
 import { PeriodSelector } from '@/components/PeriodSelector';
 import { CategoryModal } from '@/components/CategoryModal';
 import { Settings } from 'lucide-react';
+import CategoryPieChart, { CategoryPieDatum } from '@/components/CategoryPieChart';
 
 const Transactions = () => {
   // Transaction management state
@@ -108,6 +109,52 @@ const Transactions = () => {
     setCategories(prev => prev.filter(c => c !== category));
   };
 
+  const incomePieData = useMemo<CategoryPieDatum[]>(() => {
+    const totals = filteredTransactions.reduce<Map<string, number>>((acc, transaction) => {
+      if (transaction.amount <= 0) {
+        return acc;
+      }
+      const key = transaction.category || 'Sem categoria';
+      acc.set(key, (acc.get(key) ?? 0) + transaction.amount);
+      return acc;
+    }, new Map());
+
+    return Array.from(totals.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [filteredTransactions]);
+
+  const expensePieData = useMemo<CategoryPieDatum[]>(() => {
+    const totals = filteredTransactions.reduce<Map<string, number>>((acc, transaction) => {
+      if (transaction.amount >= 0) {
+        return acc;
+      }
+      const key = transaction.category || 'Sem categoria';
+      acc.set(key, (acc.get(key) ?? 0) + Math.abs(transaction.amount));
+      return acc;
+    }, new Map());
+
+    return Array.from(totals.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [filteredTransactions]);
+
+  const incomePieColors = [
+    'hsl(var(--financial-success))',
+    'hsl(var(--financial-blue))',
+    'hsl(var(--primary))',
+    'hsl(var(--accent))',
+    'hsl(var(--financial-blue-dark))',
+  ];
+
+  const expensePieColors = [
+    'hsl(var(--destructive))',
+    'hsl(var(--financial-warning))',
+    'hsl(var(--financial-blue-dark))',
+    'hsl(var(--financial-neutral))',
+    'hsl(var(--primary))',
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header - Same gradient as main page */}
@@ -168,13 +215,27 @@ const Transactions = () => {
 
         {/* Waterfall Charts: Receitas e Despesas separadas */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
+          <div className="space-y-4">
             <h3 className="text-lg font-semibold text-financial-blue-dark mb-2">Receitas por Categoria</h3>
             <WaterfallChart transactions={filteredTransactions} filter="income" />
+            {incomePieData.length > 0 && (
+              <CategoryPieChart
+                title="Distribuição de Receitas"
+                data={incomePieData}
+                colors={incomePieColors}
+              />
+            )}
           </div>
-          <div>
+          <div className="space-y-4">
             <h3 className="text-lg font-semibold text-financial-blue-dark mb-2">Despesas por Categoria</h3>
             <WaterfallChart transactions={filteredTransactions} filter="expense" />
+            {expensePieData.length > 0 && (
+              <CategoryPieChart
+                title="Distribuição de Despesas"
+                data={expensePieData}
+                colors={expensePieColors}
+              />
+            )}
           </div>
         </div>
 
